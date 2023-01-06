@@ -68,6 +68,7 @@ class SensorDataset(Dataset):
         sample = {'label': label, 'temp': temp, 'humi': humi, 'tensor': tensor}
         return sample
 
+    
 class TransferModel(nn.Module):
     """
     Transfer model load and setup
@@ -150,6 +151,7 @@ class TransferModel(nn.Module):
         x = self.model(tensor)
         return x
 
+    
 # Set train and evaluate
 def train(model, optimizer, criterion, batch_iter):
     model.train()
@@ -173,6 +175,7 @@ def train(model, optimizer, criterion, batch_iter):
     avg_loss = total_loss / size
     avg_accuracy = 100.0 * corrects.item() / size
     return avg_loss, avg_accuracy
+
 
 def evaluate(model, criterion, batch_iter):
     model.eval()
@@ -200,6 +203,7 @@ def evaluate(model, criterion, batch_iter):
     true_list = [x for y in true_list for x in y]
     pred_list = [x for y in pred_list for x in y]
     return avg_loss, avg_accuracy, true_list, pred_list
+
 
 def model_run(model_name, transfer, noise):
 
