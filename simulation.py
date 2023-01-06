@@ -26,6 +26,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, models, transforms
+from torchvision.models import ResNet18_Weights, ResNet34_Weights, ResNet50_Weights, ResNet101_Weights
+
 
 # Set random seed
 SEED = 12345
@@ -39,7 +41,7 @@ torch.backends.cudnn.benchmark = False
 
 # CUDA for PyTorch
 use_cuda = torch.cuda.is_available()
-device = torch.device("cuda:1" if use_cuda else "cpu")
+device = torch.device("cuda:0" if use_cuda else "cpu")
 
 
 # Define dataset
@@ -79,15 +81,15 @@ class TransferModel(nn.Module):
         # transfer: no, make trainable all
         if bool(transfer) == True:
             if model_name == 'Xception':
-                self.model = pretrainedmodels.__dict__['xception'](num_classes=1000, pretrained='imagenet')
+                self.model = pretrainedmodels.__dict__['xception'](num_classes=1000, weights='imagenet')
             elif model_name == 'Resnet18':
-                self.model = models.resnet18(pretrained=True)
+                self.model = models.resnet18(weights="IMAGENET1K_V1")
             elif model_name == 'Resnet34':
-                self.model = models.resnet34(pretrained=True)
+                self.model = models.resnet34(weights="IMAGENET1K_V1")
             elif model_name == 'Resnet50':
-                self.model = models.resnet50(pretrained=True)
+                self.model = models.resnet50(weights="IMAGENET1K_V2")
             elif model_name == 'Resnet101':
-                self.model = models.resnet101(pretrained=True)
+                self.model = models.resnet101(weights="IMAGENET1K_V2")
             elif model_name == 'Efficientnet-b0':
                 self.model = efficientnet_pytorch.EfficientNet.from_pretrained('efficientnet-b0')
             elif model_name == 'Efficientnet-b4':
@@ -96,15 +98,15 @@ class TransferModel(nn.Module):
                 self.model = efficientnet_pytorch.EfficientNet.from_pretrained('efficientnet-b7')
         else:
             if model_name == 'Xception':
-                self.model = pretrainedmodels.__dict__['xception'](num_classes=1000, pretrained=False)
+                self.model = pretrainedmodels.__dict__['xception'](num_classes=1000, weights=None)
             elif model_name == 'Resnet18':
-                self.model = models.resnet18(pretrained=False)
+                self.model = models.resnet18(weights=None)
             elif model_name == 'Resnet34':
-                self.model = models.resnet34(pretrained=False)
+                self.model = models.resnet34(weights=None)
             elif model_name == 'Resnet50':
-                self.model = models.resnet50(pretrained=False)
+                self.model = models.resnet50(weights=None)
             elif model_name == 'Resnet101':
-                self.model = models.resnet50(pretrained=False)
+                self.model = models.resnet50(weights=None)
             elif model_name == 'Efficientnet-b0':
                 self.model = efficientnet_pytorch.EfficientNet.from_name('efficientnet-b0')
             elif model_name == 'Efficientnet-b4':
@@ -281,14 +283,14 @@ def model_run(model_name, transfer, noise):
 
         for e in range(0, EPOCHS):
             train_loss, train_accuracy = train(model, optimizer, criterion, train_batch)
-            #print("[Epoch: %02d] train loss : %5.5f | train accuracy : %5.5f" % (e+1, train_loss, train_accuracy))
+            # print("[Epoch: %02d] train loss : %5.5f | train accuracy : %5.5f" % (e+1, train_loss, train_accuracy))
 
             train_loss, train_accuracy, _ ,_  = evaluate(model, criterion, train_batch)
-            #print("[Epoch: %02d] train loss : %5.5f | train accuracy : %03.3f" % (e+1, train_loss, train_accuracy))
+            # print("[Epoch: %02d] train loss : %5.5f | train accuracy : %03.3f" % (e+1, train_loss, train_accuracy))
             valid_loss, valid_accuracy, _ ,_  = evaluate(model, criterion, valid_batch)
-            #print("[Epoch: %02d] valid loss : %5.5f | valid accuracy : %03.3f" % (e+1, valid_loss, valid_accuracy))
+            # print("[Epoch: %02d] valid loss : %5.5f | valid accuracy : %03.3f" % (e+1, valid_loss, valid_accuracy))
             test_loss, test_accuracy, _ ,_  = evaluate(model, criterion, test_batch)
-            #print("[Epoch: %02d] test loss  : %5.5f | test accuracy  : %03.3f" % (e+1, test_loss, test_accuracy))
+            # print("[Epoch: %02d] test loss  : %5.5f | test accuracy  : %03.3f" % (e+1, test_loss, test_accuracy))
             
             print('[Epoch: {:02d}] train accuracy : {:03.3f} | valid accuracy : {:03.3f} | test accuracy  : {:03.3f}'\
                   .format(e+1, train_accuracy, valid_accuracy, test_accuracy), end="\r", flush=True)
@@ -336,7 +338,7 @@ def model_run(model_name, transfer, noise):
 
 
 if __name__ == '__main__':
-    model_name_set = ['Resnet18', 'Resnet34', 'Resnet50']
+    model_name_set = ['Resnet18','Resnet34', 'Resnet50']
     noise_set = [0.00, 0.01, 0.03, 0.05]
     
     for transfer in ['True', 'False']:
